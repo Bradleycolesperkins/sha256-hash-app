@@ -1,10 +1,12 @@
-import { useState } from "react";
+import { useState, useRef } from "react";
 import type { ChangeEvent, FormEvent } from "react";
 import type { HashFormData, HashFormProps } from "../types/hash.types";
 import HashProgress from "./HashProgress.tsx";
 import HashDetails from "./HashDetails.tsx";
 
 function HashForm({ onSubmit }: HashFormProps) {
+  const fileInputRef = useRef<HTMLInputElement>(null);
+
   const [formData, setFormData] = useState<HashFormData>({
     file: null,
     description: "",
@@ -37,6 +39,9 @@ function HashForm({ onSubmit }: HashFormProps) {
       description: "",
     });
     setSelectedFileName("");
+    if (fileInputRef.current) {
+      fileInputRef.current.value = "";
+    }
   };
 
   return (
@@ -48,6 +53,7 @@ function HashForm({ onSubmit }: HashFormProps) {
           </label>
           <div className="relative">
             <input
+              ref={fileInputRef}
               type="file"
               id="file-upload"
               onChange={handleFileChange}
