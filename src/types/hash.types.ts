@@ -11,3 +11,7 @@ export interface HashFormProps {
 export interface HashProgressProps {
   isHashing: boolean;
 }
+
+export interface HashDetailsProps {
+  formData: HashFormData;
+}

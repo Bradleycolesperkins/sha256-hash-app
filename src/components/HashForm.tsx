@@ -2,6 +2,7 @@ import { useState, useRef } from "react";
 import type { ChangeEvent, FormEvent } from "react";
 import type { HashFormData, HashFormProps } from "../types/hash.types";
 import HashProgress from "./HashProgress.tsx";
+import HashDetails from "./HashDetails.tsx";
 import { computeSHA256 } from "../utils/hash.utils";
 
 function HashForm({ onSubmit }: HashFormProps) {
@@ -105,36 +106,7 @@ function HashForm({ onSubmit }: HashFormProps) {
         {selectedFileName ? <HashProgress isHashing={isHashing} /> : null}
 
         {selectedFileName && !isHashing ? (
-          <div className="flex flex-col gap-4">
-            <div className="bg-slate-800 rounded-lg p-4">
-              <div className="flex flex-col gap-2">
-                <p className="text-sm font-medium text-slate-200">
-                  SHA256 Hash:
-                </p>
-                <p className="text-xs  break-all">{formData.hash}</p>
-              </div>
-            </div>
-
-            <div className="grid grid-cols-2 gap-2">
-              <div className="bg-slate-800 rounded-lg p-4">
-                <div className="flex flex-col gap-2">
-                  <p className="text-sm font-medium text-slate-200">
-                    Filename:
-                  </p>
-                  <p className="text-xs  break-all">{formData?.file?.name}</p>
-                </div>
-              </div>
-
-              <div className="bg-slate-800 rounded-lg p-4">
-                <div className="flex flex-col gap-2">
-                  <p className="text-sm font-medium text-slate-200">
-                    Filesize:
-                  </p>
-                  <p className="text-xs  break-all">{formData?.file?.size}</p>
-                </div>
-              </div>
-            </div>
-          </div>
+          <HashDetails formData={formData} />
         ) : null}
 
         <div className="flex flex-col gap-2">
