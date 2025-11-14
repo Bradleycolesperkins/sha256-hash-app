@@ -2,7 +2,7 @@ import { useState, useRef } from "react";
 import type { ChangeEvent, FormEvent } from "react";
 import type { HashFormData, HashFormProps } from "../types/hash.types";
 import HashProgress from "./HashProgress.tsx";
-import HashDetails from "./HashDetails.tsx";
+import { computeSHA256 } from "../utils/hash.utils";
 
 function HashForm({ onSubmit }: HashFormProps) {
   const fileInputRef = useRef<HTMLInputElement>(null);
@@ -10,16 +10,29 @@ function HashForm({ onSubmit }: HashFormProps) {
   const [formData, setFormData] = useState<HashFormData>({
     file: null,
     description: "",
+    hash: undefined,
   });
 
   const [selectedFileName, setSelectedFileName] = useState<string>("");
+  const [isHashing, setIsHashing] = useState<boolean>(false);
 
-  const handleFileChange = (e: ChangeEvent<HTMLInputElement>) => {
+  const handleFileChange = async (e: ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0] || null;
-    setFormData((prev) => ({ ...prev, file }));
-
-    console.log(file);
+    setFormData((prev) => ({ ...prev, file, hash: undefined }));
     setSelectedFileName(file ? file.name : "");
+
+    if (file) {
+      setIsHashing(true);
+      try {
+        const hash = await computeSHA256(file);
+        console.log("Hash:", hash);
+        setFormData((prev) => ({ ...prev, hash }));
+      } catch (error) {
+        console.error("Error computing hash:", error);
+      } finally {
+        setIsHashing(false);
+      }
+    }
   };
 
   const handleDescriptionChange = (e: ChangeEvent<HTMLTextAreaElement>) => {
@@ -37,8 +50,10 @@ function HashForm({ onSubmit }: HashFormProps) {
     setFormData({
       file: null,
       description: "",
+      hash: undefined,
     });
     setSelectedFileName("");
+    setIsHashing(false);
     if (fileInputRef.current) {
       fileInputRef.current.value = "";
     }
@@ -85,16 +100,42 @@ function HashForm({ onSubmit }: HashFormProps) {
               </div>
             </label>
           </div>
-          {selectedFileName && (
-            <p className="text-sm text-slate-300 mt-1">
-              Selected: <span className="font-medium">{selectedFileName}</span>
-            </p>
-          )}
         </div>
 
-        {selectedFileName ? <HashProgress /> : null}
+        {selectedFileName ? <HashProgress isHashing={isHashing} /> : null}
 
-        {selectedFileName ? <HashDetails /> : null}
+        {selectedFileName && !isHashing ? (
+          <div className="flex flex-col gap-4">
+            <div className="bg-slate-800 rounded-lg p-4">
+              <div className="flex flex-col gap-2">
+                <p className="text-sm font-medium text-slate-200">
+                  SHA256 Hash:
+                </p>
+                <p className="text-xs  break-all">{formData.hash}</p>
+              </div>
+            </div>
+
+            <div className="grid grid-cols-2 gap-2">
+              <div className="bg-slate-800 rounded-lg p-4">
+                <div className="flex flex-col gap-2">
+                  <p className="text-sm font-medium text-slate-200">
+                    Filename:
+                  </p>
+                  <p className="text-xs  break-all">{formData?.file?.name}</p>
+                </div>
+              </div>
+
+              <div className="bg-slate-800 rounded-lg p-4">
+                <div className="flex flex-col gap-2">
+                  <p className="text-sm font-medium text-slate-200">
+                    Filesize:
+                  </p>
+                  <p className="text-xs  break-all">{formData?.file?.size}</p>
+                </div>
+              </div>
+            </div>
+          </div>
+        ) : null}
 
         <div className="flex flex-col gap-2">
           <label
