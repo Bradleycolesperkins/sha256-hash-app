@@ -1,5 +1,5 @@
-function HashForm() {
-  return <div>Form here</div>;
+function HashProgress() {
+  return <div>Progress here</div>;
 }
 
-export default HashForm;
+export default HashProgress;
