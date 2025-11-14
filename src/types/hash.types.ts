@@ -18,4 +18,5 @@ export interface HashDetailsProps {
 
 export interface HashErrorProps {
   error: string;
+  onRetry?: () => void;
 }

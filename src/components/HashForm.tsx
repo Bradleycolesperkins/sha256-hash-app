@@ -19,6 +19,25 @@ function HashForm({ onSubmit }: HashFormProps) {
   const [isHashing, setIsHashing] = useState<boolean>(false);
   const [hashError, setHashError] = useState<string | undefined>(undefined);
 
+  const computeFileHash = async (file: File) => {
+    setIsHashing(true);
+    setHashError(undefined);
+
+    try {
+      const hash = await computeSHA256(file);
+      setFormData((prev) => ({ ...prev, hash }));
+    } catch (error) {
+      const errorMessage =
+        error instanceof Error
+          ? error.message
+          : "Failed to compute hash. Please try again.";
+      setHashError(errorMessage);
+      console.error("Error computing hash:", error);
+    } finally {
+      setIsHashing(false);
+    }
+  };
+
   const handleFileChange = async (e: ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0] || null;
     setFormData((prev) => ({ ...prev, file, hash: undefined }));
@@ -26,21 +45,7 @@ function HashForm({ onSubmit }: HashFormProps) {
     setHashError(undefined);
 
     if (file) {
-      setIsHashing(true);
-      try {
-        const hash = await computeSHA256(file);
-        console.log("Hash:", hash);
-        setFormData((prev) => ({ ...prev, hash }));
-      } catch (error) {
-        const errorMessage =
-          error instanceof Error
-            ? error.message
-            : "Failed to compute hash. Please try again.";
-        setHashError(errorMessage);
-        console.error("Error computing hash:", error);
-      } finally {
-        setIsHashing(false);
-      }
+      await computeFileHash(file);
     }
   };
 
@@ -66,6 +71,12 @@ function HashForm({ onSubmit }: HashFormProps) {
     setHashError(undefined);
     if (fileInputRef.current) {
       fileInputRef.current.value = "";
+    }
+  };
+
+  const handleRetry = async () => {
+    if (formData.file) {
+      await computeFileHash(formData.file);
     }
   };
 
@@ -114,7 +125,9 @@ function HashForm({ onSubmit }: HashFormProps) {
 
         {selectedFileName ? <HashProgress isHashing={isHashing} /> : null}
 
-        {hashError ? <HashError error={hashError} /> : null}
+        {hashError ? (
+          <HashError error={hashError} onRetry={handleRetry} />
+        ) : null}
 
         {selectedFileName && !isHashing && !hashError ? (
           <HashDetails formData={formData} />
