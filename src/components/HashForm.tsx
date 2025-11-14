@@ -3,6 +3,7 @@ import type { ChangeEvent, FormEvent } from "react";
 import type { HashFormData, HashFormProps } from "../types/hash.types";
 import HashProgress from "./HashProgress.tsx";
 import HashDetails from "./HashDetails.tsx";
+import HashError from "./HashError.tsx";
 import { computeSHA256 } from "../utils/hash.utils";
 
 function HashForm({ onSubmit }: HashFormProps) {
@@ -16,11 +17,13 @@ function HashForm({ onSubmit }: HashFormProps) {
 
   const [selectedFileName, setSelectedFileName] = useState<string>("");
   const [isHashing, setIsHashing] = useState<boolean>(false);
+  const [hashError, setHashError] = useState<string | undefined>(undefined);
 
   const handleFileChange = async (e: ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0] || null;
     setFormData((prev) => ({ ...prev, file, hash: undefined }));
     setSelectedFileName(file ? file.name : "");
+    setHashError(undefined);
 
     if (file) {
       setIsHashing(true);
@@ -29,6 +32,11 @@ function HashForm({ onSubmit }: HashFormProps) {
         console.log("Hash:", hash);
         setFormData((prev) => ({ ...prev, hash }));
       } catch (error) {
+        const errorMessage =
+          error instanceof Error
+            ? error.message
+            : "Failed to compute hash. Please try again.";
+        setHashError(errorMessage);
         console.error("Error computing hash:", error);
       } finally {
         setIsHashing(false);
@@ -55,6 +63,7 @@ function HashForm({ onSubmit }: HashFormProps) {
     });
     setSelectedFileName("");
     setIsHashing(false);
+    setHashError(undefined);
     if (fileInputRef.current) {
       fileInputRef.current.value = "";
     }
@@ -105,7 +114,9 @@ function HashForm({ onSubmit }: HashFormProps) {
 
         {selectedFileName ? <HashProgress isHashing={isHashing} /> : null}
 
-        {selectedFileName && !isHashing ? (
+        {hashError ? <HashError error={hashError} /> : null}
+
+        {selectedFileName && !isHashing && !hashError ? (
           <HashDetails formData={formData} />
         ) : null}
 

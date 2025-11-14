@@ -15,3 +15,7 @@ export interface HashProgressProps {
 export interface HashDetailsProps {
   formData: HashFormData;
 }
+
+export interface HashErrorProps {
+  error: string;
+}
