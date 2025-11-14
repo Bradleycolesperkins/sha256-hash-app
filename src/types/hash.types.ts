@@ -6,6 +6,11 @@ export interface HashFormData {
 
 export interface HashFormProps {
   onSubmit?: (data: HashFormData) => void;
+  addHash: (data: HashFormData) => void;
+}
+
+export interface HashHistoryProps {
+  data: HashFormData[];
 }
 
 export interface HashProgressProps {

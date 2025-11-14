@@ -11,7 +11,7 @@ import {
 } from "../constants/app.constants";
 import { formatFileSize } from "../utils/hash.utils";
 
-function HashForm({ onSubmit }: HashFormProps) {
+function HashForm({ onSubmit, addHash }: HashFormProps) {
   const fileInputRef = useRef<HTMLInputElement>(null);
 
   const [formData, setFormData] = useState<HashFormData>({
@@ -73,9 +73,14 @@ function HashForm({ onSubmit }: HashFormProps) {
 
   const handleSubmit = (e: FormEvent<HTMLFormElement>) => {
     e.preventDefault();
+    // Add the hash to the context
+    addHash(formData);
+    // Also call the onSubmit prop if provided
     if (onSubmit) {
       onSubmit(formData);
     }
+    // Clear the form after submission
+    handleReset();
   };
 
   const handleReset = () => {
@@ -100,7 +105,7 @@ function HashForm({ onSubmit }: HashFormProps) {
   };
 
   return (
-    <form onSubmit={handleSubmit} className="w-full max-w-md p-6">
+    <form onSubmit={handleSubmit} className="w-full max-w-md">
       <div className="flex flex-col gap-4">
         <div className="flex flex-col gap-2">
           <label htmlFor="file-upload" className="text-sm font-medium">
@@ -147,10 +152,10 @@ function HashForm({ onSubmit }: HashFormProps) {
         {selectedFileName ? <HashProgress isHashing={isHashing} /> : null}
 
         {hashError ? (
-          <HashError 
-            error={hashError} 
+          <HashError
+            error={hashError}
             onRetry={handleRetry}
-            hasRetry={!fileError} 
+            hasRetry={!fileError}
           />
         ) : null}
 
