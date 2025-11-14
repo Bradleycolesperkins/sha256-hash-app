@@ -22,6 +22,7 @@ function HashForm({ onSubmit, addHash }: HashFormProps) {
 
   const [selectedFileName, setSelectedFileName] = useState<string>("");
   const [isHashing, setIsHashing] = useState<boolean>(false);
+  const [hashProgress, setHashProgress] = useState<number>(0);
   const [hashError, setHashError] = useState<string | undefined>(undefined);
   const [fileError, setFileError] = useState<boolean>(false);
 
@@ -29,6 +30,7 @@ function HashForm({ onSubmit, addHash }: HashFormProps) {
     setIsHashing(true);
     setHashError(undefined);
     setFileError(false);
+    setHashProgress(0);
 
     // Check file size before computing hash
     if (file.size > MAX_FILE_SIZE) {
@@ -40,7 +42,9 @@ function HashForm({ onSubmit, addHash }: HashFormProps) {
     }
 
     try {
-      const hash = await computeSHA256(file);
+      const hash = await computeSHA256(file, (progress) => {
+        setHashProgress(progress);
+      });
       setFormData((prev) => ({ ...prev, hash }));
     } catch (error) {
       const errorMessage =
@@ -91,6 +95,7 @@ function HashForm({ onSubmit, addHash }: HashFormProps) {
     });
     setSelectedFileName("");
     setIsHashing(false);
+    setHashProgress(0);
     setHashError(undefined);
     setFileError(false);
     if (fileInputRef.current) {
@@ -149,7 +154,7 @@ function HashForm({ onSubmit, addHash }: HashFormProps) {
           </div>
         </div>
 
-        {selectedFileName ? <HashProgress isHashing={isHashing} /> : null}
+        {selectedFileName ? <HashProgress isHashing={isHashing} progress={hashProgress} /> : null}
 
         {hashError ? (
           <HashError

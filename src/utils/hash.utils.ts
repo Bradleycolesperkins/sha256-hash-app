@@ -4,7 +4,10 @@ import {
   FILE_SIZE_UNITS,
 } from "../constants/app.constants";
 
-export async function computeSHA256(file: File): Promise<string> {
+export async function computeSHA256(
+  file: File,
+  onProgress?: (progress: number) => void,
+): Promise<string> {
   const total = file.size;
   let offset = 0;
   const chunks: Uint8Array[] = [];
@@ -16,6 +19,12 @@ export async function computeSHA256(file: File): Promise<string> {
       const arrayBuffer = await readChunk(chunk);
       chunks.push(new Uint8Array(arrayBuffer));
       offset += CHUNK_SIZE;
+
+      const progress = Math.min(Math.round((offset / total) * 100), 99); // only go to 99 until web worker
+
+      if (onProgress) {
+        onProgress(progress);
+      }
 
       // Send to event loop to keep UI responsive
       await new Promise<void>((resolve) => setTimeout(resolve, 0));
@@ -33,6 +42,11 @@ export async function computeSHA256(file: File): Promise<string> {
 
     // Calculate hash using Web Worker to prevent UI freezing
     const hash = await calculateHashInWorker(combined.buffer);
+
+    // set to 100 after Web worker digests
+    if (onProgress) {
+      onProgress(100);
+    }
 
     return hash;
   } catch (error) {

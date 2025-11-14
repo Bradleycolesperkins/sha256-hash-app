@@ -15,6 +15,7 @@ export interface HashHistoryProps {
 
 export interface HashProgressProps {
   isHashing: boolean;
+  progress?: number;
 }
 
 export interface HashDetailsProps {
