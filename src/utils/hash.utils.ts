@@ -1,5 +1,16 @@
+import {
+  CHUNK_SIZE,
+  MAX_FILE_SIZE,
+  BYTES_PER_KB,
+  FILE_SIZE_UNITS,
+} from "../constants/app.constants";
+
 export async function computeSHA256(file: File): Promise<string> {
-  const CHUNK_SIZE = 4 * 1024 * 1024; // 4MB chunks
+  if (file.size > MAX_FILE_SIZE) {
+    throw new Error(
+      `File size exceeds the maximum allowed size of ${formatFileSize(MAX_FILE_SIZE)}`,
+    );
+  }
   const total = file.size;
   let offset = 0;
   const chunks: Uint8Array[] = [];
@@ -104,11 +115,11 @@ export function formatFileSize(
 ): string {
   if (bytes === undefined || bytes === 0) return "0 Bytes";
 
-  const k = 1024;
-  const sizes = ["Bytes", "KB", "MB", "GB", "TB", "PB", "EB", "ZB", "YB"];
-  const i = Math.floor(Math.log(bytes) / Math.log(k));
+  const i = Math.floor(Math.log(bytes) / Math.log(BYTES_PER_KB));
 
   return (
-    parseFloat((bytes / Math.pow(k, i)).toFixed(decimals)) + " " + sizes[i]
+    parseFloat((bytes / Math.pow(BYTES_PER_KB, i)).toFixed(decimals)) +
+    " " +
+    FILE_SIZE_UNITS[i]
   );
 }

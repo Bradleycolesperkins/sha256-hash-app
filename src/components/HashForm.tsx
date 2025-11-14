@@ -5,6 +5,11 @@ import HashProgress from "./HashProgress.tsx";
 import HashDetails from "./HashDetails.tsx";
 import HashError from "./HashError.tsx";
 import { computeSHA256 } from "../utils/hash.utils";
+import {
+  MAX_DESCRIPTION_LENGTH,
+  MAX_FILE_SIZE,
+} from "../constants/app.constants";
+import { formatFileSize } from "../utils/hash.utils";
 
 function HashForm({ onSubmit }: HashFormProps) {
   const fileInputRef = useRef<HTMLInputElement>(null);
@@ -50,7 +55,8 @@ function HashForm({ onSubmit }: HashFormProps) {
   };
 
   const handleDescriptionChange = (e: ChangeEvent<HTMLTextAreaElement>) => {
-    setFormData((prev) => ({ ...prev, description: e.target.value }));
+    const newDescription = e.target.value.slice(0, MAX_DESCRIPTION_LENGTH);
+    setFormData((prev) => ({ ...prev, description: newDescription }));
   };
 
   const handleSubmit = (e: FormEvent<HTMLFormElement>) => {
@@ -117,7 +123,9 @@ function HashForm({ onSubmit }: HashFormProps) {
                 <p className="mb-2 text-sm text-slate-400">
                   <span className="font-semibold">Click to upload</span>
                 </p>
-                <p className="text-xs text-slate-500">Any file type accepted</p>
+                <p className="text-xs text-slate-500">
+                  Any file type accepted (Max: {formatFileSize(MAX_FILE_SIZE)})
+                </p>
               </div>
             </label>
           </div>
@@ -147,7 +155,11 @@ function HashForm({ onSubmit }: HashFormProps) {
             placeholder="Enter a description for this file..."
             rows={4}
             className="w-full px-4 py-2 bg-slate-700 border border-slate-600 rounded-lg text-white placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent resize-none"
+            maxLength={MAX_DESCRIPTION_LENGTH}
           />
+          <p className="text-xs text-slate-400 mt-1 text-right">
+            {formData.description.length}/{MAX_DESCRIPTION_LENGTH} characters
+          </p>
         </div>
 
         <div className="flex gap-3 pt-2">
