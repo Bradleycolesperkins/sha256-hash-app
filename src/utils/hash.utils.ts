@@ -1,16 +1,10 @@
 import {
   CHUNK_SIZE,
-  MAX_FILE_SIZE,
   BYTES_PER_KB,
   FILE_SIZE_UNITS,
 } from "../constants/app.constants";
 
 export async function computeSHA256(file: File): Promise<string> {
-  if (file.size > MAX_FILE_SIZE) {
-    throw new Error(
-      `File size exceeds the maximum allowed size of ${formatFileSize(MAX_FILE_SIZE)}`,
-    );
-  }
   const total = file.size;
   let offset = 0;
   const chunks: Uint8Array[] = [];

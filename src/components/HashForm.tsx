@@ -23,10 +23,21 @@ function HashForm({ onSubmit }: HashFormProps) {
   const [selectedFileName, setSelectedFileName] = useState<string>("");
   const [isHashing, setIsHashing] = useState<boolean>(false);
   const [hashError, setHashError] = useState<string | undefined>(undefined);
+  const [fileError, setFileError] = useState<boolean>(false);
 
   const computeFileHash = async (file: File) => {
     setIsHashing(true);
     setHashError(undefined);
+    setFileError(false);
+
+    // Check file size before computing hash
+    if (file.size > MAX_FILE_SIZE) {
+      const errorMessage = `File size exceeds the maximum allowed size of ${formatFileSize(MAX_FILE_SIZE)}`;
+      setHashError(errorMessage);
+      setFileError(true);
+      setIsHashing(false);
+      return;
+    }
 
     try {
       const hash = await computeSHA256(file);
@@ -48,6 +59,7 @@ function HashForm({ onSubmit }: HashFormProps) {
     setFormData((prev) => ({ ...prev, file, hash: undefined }));
     setSelectedFileName(file ? file.name : "");
     setHashError(undefined);
+    setFileError(false);
 
     if (file) {
       await computeFileHash(file);
@@ -75,6 +87,7 @@ function HashForm({ onSubmit }: HashFormProps) {
     setSelectedFileName("");
     setIsHashing(false);
     setHashError(undefined);
+    setFileError(false);
     if (fileInputRef.current) {
       fileInputRef.current.value = "";
     }
@@ -134,7 +147,11 @@ function HashForm({ onSubmit }: HashFormProps) {
         {selectedFileName ? <HashProgress isHashing={isHashing} /> : null}
 
         {hashError ? (
-          <HashError error={hashError} onRetry={handleRetry} />
+          <HashError 
+            error={hashError} 
+            onRetry={handleRetry}
+            hasRetry={!fileError} 
+          />
         ) : null}
 
         {selectedFileName && !isHashing && !hashError ? (
