@@ -154,7 +154,9 @@ function HashForm({ onSubmit, addHash }: HashFormProps) {
           </div>
         </div>
 
-        {selectedFileName ? <HashProgress isHashing={isHashing} progress={hashProgress} /> : null}
+        {selectedFileName ? (
+          <HashProgress isHashing={isHashing} progress={hashProgress} />
+        ) : null}
 
         {hashError ? (
           <HashError

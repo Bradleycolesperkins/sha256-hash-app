@@ -32,7 +32,10 @@ export function HashHistory({ data }: HashHistoryProps) {
                     {item.file?.name}
                   </span>
                   {item.description && (
-                    <span className="text-xs text-slate-400 wrap-break-word max-w-[150px]">
+                    <span 
+                      className="text-xs text-slate-400 wrap-break-word max-w-[150px]"
+                      aria-label="file description"
+                    >
                       {item.description}
                     </span>
                   )}
